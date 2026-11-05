@@ -17,7 +17,7 @@ AI-powered Personalized Learning Intelligence Platform
 
 ---
 
-## Why LearnLens AI?
+
 ## Why LearnLens AI?
 
 I built LearnLens AI because of my own experience with self-study. When you study alone, it is easy to feel unsure: *Did I really understand this topic? What should I revise next? Am I even ready for the exam?* As someone who learns at my own pace, I often wished for a tool that would patiently show me where I stood instead of just handing me more material.
