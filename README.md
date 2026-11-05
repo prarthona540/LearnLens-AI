@@ -1,5 +1,4 @@
-# LearnLens-AI
-AI-powered Personalized Learning Intelligence Platform
+
 <h1 align="center">LearnLens AI</h1>
 
 <p align="center">
