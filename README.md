@@ -31,15 +31,27 @@ LearnLens AI closes that loop. It turns raw notes into quizzes, measures perform
 
 ## Core Features
 
-| # | Feature | What it does |
-|---|---------|--------------|
-| 1 | **Smart Notes** | Summarizes notes and extracts key concepts with Gemini |
-| 2 | **Auto Quiz Generation** | Creates quizzes directly from your own notes |
-| 3 | **Gap Detection** | Finds weak topics from quiz performance |
-| 4 | **Study Recommendations** | Suggests what to revise next, in priority order |
-| 5 | **Exam Readiness and Learning DNA** | Scores readiness and profiles strengths, weaknesses, and knowledge gaps |
 
-## The Learning DNA
+**Core learning loop**
+- Smart Note Capture: turn text, photos of handwritten notes, and PDFs into clean notes
+- Note summarization and key concept extraction
+- Automated, topic-tagged quiz generation
+- Learning gap and weak topic detection
+- Personalized study recommendations
+- Exam readiness score and Learning DNA
+
+**Personalization**
+- Bilingual explanations (Bangla and English)
+- Confidence tracker: confidence vs correctness
+- Topic to starter note
+
+**Active learning**
+- Spaced revision planner
+- Teach-it-Back (Feynman mode)
+- Flashcards and mistake journal
+
+**Advanced (planned)**
+- Voice to note, past paper analyzer, ask-your-notes chat, progress dashboard and streaks
 
 The Learning DNA is a per-student profile that updates as the student learns:
 
@@ -118,14 +130,18 @@ GEMINI_API_KEY=your_gemini_api_key
 Then verify the server at `http://localhost:5000/api/health`.
 
 ## Roadmap
+## Roadmap
 
 - [x] Project vision, architecture, and documentation
-- [ ] Backend foundation and authentication
-- [ ] Notes module with Gemini summarization
-- [ ] Quiz generation and scoring
-- [ ] Gap detection and Learning DNA engine
-- [ ] React frontend and dashboard
+- [ ] Phase 1: Auth, Smart Note Capture, summaries, quizzes, gap detection, Learning DNA
+- [ ] Phase 2: Bilingual explanations, confidence tracker, starter notes
+- [ ] Phase 3: Spaced revision, Teach-it-Back, flashcards and mistake journal
+- [ ] Phase 4: Voice notes, past paper analyzer, ask-your-notes, dashboard
 - [ ] Deployment
+
+Details: [Feature Roadmap](docs/Feature-roadmap.md)
+
+
 
 ## Engineering Principles
 
