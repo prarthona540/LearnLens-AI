@@ -362,3 +362,144 @@ DO NOT include markdown code blocks (\`\`\`json). Provide clean, parseable JSON 
     };
   }
 };
+
+
+/**
+ * Generate adaptive Pomodoro smart break and mood remediation recommendation
+ * @param {Array<object>} recentSessions - Recent study sessions with duration, focus, distractions & mood
+ * @param {string} currentMood - Most recent mood state reported by user
+ * @returns {Promise<{ breakType: string, recommendedBreakMinutes: number, burnoutRiskLevel: string, activityGuidance: string, recommendedNextAction: string, motivationalInsight: string }>}
+ */
+export const generateFocusBreakRecommendation = async (recentSessions = [], currentMood = 'Focused') => {
+  const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+
+  const prompt = `You are a Principal Cognitive Ergonomist and Student Psychology Specialist for LearnLens AI.
+Analyze the student's recent Pomodoro focus intervals, distraction spikes, and emotional mood states to prescribe an adaptive, evidence-based study break and cognitive reset.
+
+RECENT SESSIONS HISTORY:
+${JSON.stringify(recentSessions.slice(0, 5), null, 2)}
+
+CURRENT MOOD STATE:
+"${currentMood}"
+
+TASK:
+1. Evaluate fatigue levels, screen strain, distraction accumulation, and burnout risk.
+2. Select the optimal break type: "Physical Stretch", "Breathing Exercise", "Hydration & Nutrition", "Cognitive Topic Switch", or "Deep Rest".
+3. Assign a realistic break duration in minutes (5, 10, 15, or 25).
+4. Provide concrete, step-by-step activity guidance for the student during this break.
+5. Provide actionable guidance on what the student should do next.
+6. Provide an empathetic, motivating cognitive reframe.
+
+STRICT JSON OUTPUT FORMAT:
+Respond ONLY with a valid JSON object matching this schema:
+{
+  "breakType": "Physical Stretch",
+  "recommendedBreakMinutes": 10,
+  "burnoutRiskLevel": "Low",
+  "activityGuidance": "string",
+  "recommendedNextAction": "string",
+  "motivationalInsight": "string"
+}
+
+BurnoutRiskLevel must be: "Low", "Moderate", or "High".
+Do NOT include markdown fences (\`\`\`json) or conversational text.`;
+
+  try {
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: modelName,
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        temperature: 0.25,
+      },
+    });
+
+    const rawText = response.text;
+    const sanitized = sanitizeJsonResponse(rawText);
+    const parsed = JSON.parse(sanitized);
+
+    return {
+      breakType: parsed.breakType || (currentMood === 'Tired' ? 'Deep Rest' : 'Physical Stretch'),
+      recommendedBreakMinutes: Number(parsed.recommendedBreakMinutes) || 10,
+      burnoutRiskLevel: ['Low', 'Moderate', 'High'].includes(parsed.burnoutRiskLevel)
+        ? parsed.burnoutRiskLevel
+        : 'Low',
+      activityGuidance:
+        parsed.activityGuidance ||
+        'Step away from all screens. Stand up, roll your shoulders, and drink a tall glass of cold water.',
+      recommendedNextAction:
+        parsed.recommendedNextAction ||
+        'Return to your next 25-minute Pomodoro session with single-tasking focus.',
+      motivationalInsight:
+        parsed.motivationalInsight ||
+        'Consistent learning happens in pulses of intensity followed by intentional recovery.',
+    };
+  } catch (error) {
+    console.warn(`[Focus Service Notice]: ${error.message}. Using cognitive heuristic break model.`);
+
+    // Heuristic rule-based fallback
+    switch (currentMood) {
+      case 'Tired':
+        return {
+          breakType: 'Deep Rest',
+          recommendedBreakMinutes: 15,
+          burnoutRiskLevel: 'Moderate',
+          activityGuidance:
+            'Close your eyes in a dimly lit room, practice non-sleep deep rest (NSDR) or progressive muscle relaxation for 15 minutes. Avoid looking at your phone.',
+          recommendedNextAction:
+            'If energy is still low, switch to passive review (listening to lecture audio) or conclude study for today.',
+          motivationalInsight:
+            'Memory consolidation and synaptic pruning occur during rest, not during chronic exhaustion.',
+        };
+      case 'Anxious':
+        return {
+          breakType: 'Breathing Exercise',
+          recommendedBreakMinutes: 10,
+          burnoutRiskLevel: 'Moderate',
+          activityGuidance:
+            'Practice 4-7-8 physiological sigh breathing: Double inhale through the nose (one deep, one short top-off), followed by a prolonged, relaxed mouth exhale. Repeat 6 cycles.',
+          recommendedNextAction:
+            'Break down your next study topic into a tiny 5-minute milestone to eliminate cognitive overwhelm.',
+          motivationalInsight:
+            'Anxiety is simply unchanneled arousal. Ground yourself in physical sensations and re-engage one concept at a time.',
+        };
+      case 'Distracted':
+        return {
+          breakType: 'Cognitive Topic Switch',
+          recommendedBreakMinutes: 5,
+          burnoutRiskLevel: 'Low',
+          activityGuidance:
+            'Do 15 bodyweight squats or a brisk 3-minute walk to release dopamine and reset attention circuits.',
+          recommendedNextAction:
+            'Switch to an interactive Quiz or RPG Boss Battle rather than passive reading to force active retrieval.',
+          motivationalInsight:
+            'When focus wanes on dry text, active diagnostic challenges instantly re-engage task engagement.',
+        };
+      case 'Energized':
+        return {
+          breakType: 'Hydration & Nutrition',
+          recommendedBreakMinutes: 5,
+          burnoutRiskLevel: 'Low',
+          activityGuidance:
+            'Drink 250ml of water, stretch your neck and forearms, and prepare your workspace for another sprint.',
+          recommendedNextAction:
+            'Tackle your hardest pending conceptual topic while executive attention is at peak capacity.',
+          motivationalInsight:
+            'You are in a prime cognitive flow state. Protect this momentum by eliminating external notifications.',
+        };
+      default: // 'Focused'
+        return {
+          breakType: 'Physical Stretch',
+          recommendedBreakMinutes: 5,
+          burnoutRiskLevel: 'Low',
+          activityGuidance:
+            'Gaze at an object 20 feet away for 20 seconds to relieve ciliary eye muscle spasm, and do a gentle neck stretch.',
+          recommendedNextAction:
+            'Continue your structured Pomodoro interval on the current note topic.',
+          motivationalInsight:
+            'Disciplined short breaks preserve sustained high-fidelity focus across multi-hour study sessions.',
+        };
+    }
+  }
+};
