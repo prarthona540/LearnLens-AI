@@ -9,6 +9,7 @@ import audioRoutes from './routes/audioRoutes.js';
 import bossRoutes from './routes/bossRoutes.js';
 import predictionRoutes from './routes/predictionRoutes.js';
 import focusRoutes from './routes/focusRoutes.js';
+import gamificationRoutes from './routes/gamificationRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -46,6 +47,7 @@ app.use('/api/audio', audioRoutes);
 app.use('/api/boss', bossRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/focus', focusRoutes);
+app.use('/api/gamification', gamificationRoutes);
 
 // Catch-all 404 Route Handler
 app.use((req, res, next) => {
