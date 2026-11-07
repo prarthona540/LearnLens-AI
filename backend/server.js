@@ -11,6 +11,7 @@ import predictionRoutes from './routes/predictionRoutes.js';
 import focusRoutes from './routes/focusRoutes.js';
 import gamificationRoutes from './routes/gamificationRoutes.js';
 import mockExamRoutes from './routes/mockExamRoutes.js';
+import constellationRoutes from './routes/constellationRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -50,6 +51,7 @@ app.use('/api/predictions', predictionRoutes);
 app.use('/api/focus', focusRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/mock', mockExamRoutes);
+app.use('/api/constellation', constellationRoutes);
 
 // Catch-all 404 Route Handler
 app.use((req, res, next) => {
