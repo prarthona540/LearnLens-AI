@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import dnaRoutes from './routes/dnaRoutes.js';
+import audioRoutes from './routes/audioRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -38,6 +39,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/dna', dnaRoutes);
+app.use('/api/audio', audioRoutes);
 
 // Catch-all 404 Route Handler
 app.use((req, res, next) => {
