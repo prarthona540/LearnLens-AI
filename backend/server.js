@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import dnaRoutes from './routes/dnaRoutes.js';
 import audioRoutes from './routes/audioRoutes.js';
+import bossRoutes from './routes/bossRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -40,6 +41,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/dna', dnaRoutes);
 app.use('/api/audio', audioRoutes);
+app.use('/api/boss', bossRoutes);
 
 // Catch-all 404 Route Handler
 app.use((req, res, next) => {

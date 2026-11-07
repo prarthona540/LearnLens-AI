@@ -262,3 +262,103 @@ const generateFallbackRecommendations = (weakTopics = []) => {
 
   return actions.slice(0, 4);
 };
+
+
+/**
+ * Generate a high-intensity 10-question RPG-style Boss Fight Challenge targeting student weak topics
+ * @param {Array<string>} weakTopics
+ * @returns {Promise<{ bossTitle: string, bossSubtitle: string, bossLore: string, bossHealth: number, timeLimitSeconds: number, questions: Array<{ questionText: string, options: string[], correctAnswerIndex: number, explanation: string, topicTag: string, damage: number }> }>}
+ */
+export const generateBossChallenge = async (weakTopics = []) => {
+  const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const targetTopics = weakTopics.length > 0 ? weakTopics.slice(0, 5) : ['Core Problem Solving', 'Algorithmic Optimization'];
+
+  const prompt = `You are a Principal RPG Gamification Designer and Technical Assessment Architect for LearnLens AI.
+Your objective is to generate an epic, high-intensity "Boss Battle" diagnostic exam for a student struggling with specific technical concepts.
+
+TARGET WEAK TOPICS:
+${JSON.stringify(targetTopics)}
+
+TASK:
+1. Create a memorable, technically thematic Boss Title (e.g., "The Distributed Split-Brain Hydra", "The Deadlock Dragon", "The Asynchronous Event Loop Colossus", "The Memory Leak Behemoth").
+2. Create an engaging subtitle and brief 2-sentence lore motivating the learner to conquer their weaknesses.
+3. Generate exactly 10 challenging scenario-based multiple-choice questions targeting these exact weak topics.
+4. Each question deals 10 damage to the Boss when answered correctly.
+
+STRICT JSON OUTPUT FORMAT:
+Return ONLY a valid JSON object matching this schema:
+{
+  "bossTitle": "string",
+  "bossSubtitle": "string",
+  "bossLore": "string",
+  "bossHealth": 100,
+  "timeLimitSeconds": 300,
+  "questions": [
+    {
+      "questionText": "string",
+      "options": ["string", "string", "string", "string"],
+      "correctAnswerIndex": 0,
+      "explanation": "string",
+      "topicTag": "string",
+      "damage": 10
+    }
+  ]
+}
+
+DO NOT include markdown code blocks (\`\`\`json). Provide clean, parseable JSON only.`;
+
+  try {
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: modelName,
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        temperature: 0.3,
+      },
+    });
+
+    const rawText = response.text;
+    const sanitized = sanitizeJsonResponse(rawText);
+    const parsed = JSON.parse(sanitized);
+
+    const questions = validateAndFormatQuestions(parsed.questions || []);
+
+    return {
+      bossTitle: parsed.bossTitle || 'The Cognitive Sentinel',
+      bossSubtitle: parsed.bossSubtitle || 'Guardian of Unmastered Concepts',
+      bossLore:
+        parsed.bossLore ||
+        'This legendary entity feeds on unaddressed misconceptions. Answer correctly to deplete its health bar and master the skill tree!',
+      bossHealth: 100,
+      timeLimitSeconds: parsed.timeLimitSeconds || 300,
+      questions: questions.map((q) => ({
+        ...q,
+        damage: 10,
+      })),
+    };
+  } catch (error) {
+    console.warn(`[Boss Generation Notice]: ${error.message}. Using intelligent heuristic Boss Fight.`);
+    const primaryWeak = targetTopics[0] || 'System Fundamentals';
+    return {
+      bossTitle: `The ${primaryWeak.split(' ')[0]} Titan`,
+      bossSubtitle: `Master of ${primaryWeak}`,
+      bossLore: `A formidable challenge manifests around your detected vulnerabilities in ${primaryWeak}. Vanquish this adversary to unlock the next branch in your skill tree!`,
+      bossHealth: 100,
+      timeLimitSeconds: 300,
+      questions: Array.from({ length: 10 }).map((_, idx) => ({
+        questionText: `[Boss Challenge Q${idx + 1}] When addressing complex constraints in ${primaryWeak}, which approach ensures correct invariant preservation?`,
+        options: [
+          'Enforcing strict ordering and validating edge boundary conditions',
+          'Ignoring state transitions and relying solely on optimistic recovery',
+          'Allocating unbounded buffers without backpressure management',
+          'Disabling all concurrent synchronization mechanisms',
+        ],
+        correctAnswerIndex: 0,
+        explanation: 'Enforcing ordering and verifying edge boundaries strictly preserves system invariants against failure states.',
+        topicTag: primaryWeak,
+        damage: 10,
+      })),
+    };
+  }
+};
