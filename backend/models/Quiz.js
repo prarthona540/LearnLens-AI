@@ -76,6 +76,17 @@ const quizSchema = new mongoose.Schema(
       default: 0,
       min: [0, 'Total questions cannot be negative'],
     },
+    userAnswers: {
+      type: [
+        {
+          questionId: { type: mongoose.Schema.Types.ObjectId },
+          selectedOptionIndex: { type: Number },
+          isCorrect: { type: Boolean },
+          topicTag: { type: String },
+        },
+      ],
+      default: [],
+    },
     isCompleted: {
       type: Boolean,
       default: false,

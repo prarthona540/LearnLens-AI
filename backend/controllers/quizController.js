@@ -152,6 +152,12 @@ export const submitQuiz = async (req, res) => {
     // Update Quiz status in database
     quiz.score = score;
     quiz.isCompleted = true;
+    quiz.userAnswers = detailedReview.map((r) => ({
+      questionId: r.questionId,
+      selectedOptionIndex: r.selectedOptionIndex,
+      isCorrect: r.isCorrect,
+      topicTag: r.topicTag,
+    }));
     await quiz.save();
 
     // Optionally update linked note's weak topics

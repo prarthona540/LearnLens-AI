@@ -28,7 +28,7 @@ const learningDNASchema = new mongoose.Schema(
       default: [],
     },
     recommendedActions: {
-      type: [String],
+      type: [mongoose.Schema.Types.Mixed],
       default: [],
     },
     lastUpdated: {

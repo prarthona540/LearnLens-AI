@@ -132,3 +132,133 @@ ${noteContent.slice(0, 8000)}
     throw error;
   }
 };
+
+/**
+ * Generate Learning DNA insights, knowledge gaps, and prioritized study recommendations
+ * @param {Array} quizHistory - Array of quiz attempt summaries
+ * @param {Array<string>} weakTopics - Aggregate array of detected weak topics
+ * @returns {Promise<{ knowledgeGaps: string[], recommendedActions: Array<{ action: string, priority: string, resourceType: string }> }>}
+ */
+export const generateLearningDNAInsights = async (quizHistory = [], weakTopics = []) => {
+  const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+
+  const prompt = `You are a Principal Learning Intelligence and Cognitive Diagnostic Architect for LearnLens AI.
+Analyze the student's historical quiz performance, accuracy patterns, and identified weak topics to generate high-yield learning insights.
+
+PERFORMANCE DATA:
+- Overall Quizzes Analyzed: ${quizHistory.length}
+- Quiz History Summary: ${JSON.stringify(quizHistory, null, 2)}
+- Identified Weak Topics / Misconceptions: ${JSON.stringify(weakTopics)}
+
+OUTPUT REQUIREMENTS:
+Return ONLY a strict JSON object with this exact schema:
+{
+  "knowledgeGaps": ["topic/concept name"],
+  "recommendedActions": [
+    {
+      "action": "string",
+      "priority": "High",
+      "resourceType": "Review Note"
+    }
+  ]
+}
+
+STRICT CONSTRAINTS:
+1. "knowledgeGaps": An array of 3 to 6 specific, conceptual knowledge gaps synthesized from the student's errors.
+2. "recommendedActions": 3 to 5 prioritized, prescriptive micro-steps (e.g., "Review Coffman Conditions notes to master Deadlock Invariants", "Take a targeted 5-question quiz on Circular Wait").
+3. "priority" must be strictly one of: "High", "Medium", or "Low".
+4. "resourceType" must be strictly one of: "Review Note" or "Practice Quiz".
+5. OUTPUT VALID JSON ONLY. Do not wrap in markdown code fences or conversational commentary.`;
+
+  try {
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: modelName,
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        temperature: 0.2,
+      },
+    });
+
+    const rawText = response.text;
+    const sanitizedText = sanitizeJsonResponse(rawText);
+    const parsed = JSON.parse(sanitizedText);
+
+    if (!parsed || typeof parsed !== 'object') {
+      throw new Error('AI response was not a valid JSON object');
+    }
+
+    const knowledgeGaps = Array.isArray(parsed.knowledgeGaps)
+      ? parsed.knowledgeGaps.map((g) => String(g).trim()).filter(Boolean)
+      : weakTopics.slice(0, 5);
+
+    const validPriorities = ['High', 'Medium', 'Low'];
+    const validResourceTypes = ['Review Note', 'Practice Quiz'];
+
+    const recommendedActions = Array.isArray(parsed.recommendedActions)
+      ? parsed.recommendedActions
+          .filter((a) => a && a.action)
+          .map((a) => ({
+            action: String(a.action).trim(),
+            priority: validPriorities.includes(a.priority) ? a.priority : 'Medium',
+            resourceType: validResourceTypes.includes(a.resourceType)
+              ? a.resourceType
+              : 'Review Note',
+          }))
+      : [];
+
+    return {
+      knowledgeGaps: knowledgeGaps.length > 0 ? knowledgeGaps : weakTopics.slice(0, 5),
+      recommendedActions:
+        recommendedActions.length > 0
+          ? recommendedActions
+          : generateFallbackRecommendations(weakTopics),
+    };
+  } catch (error) {
+    console.warn(`[Gemini Learning DNA Notice]: ${error.message}. Using intelligent heuristic fallback.`);
+    return {
+      knowledgeGaps: weakTopics.length > 0 ? [...new Set(weakTopics)].slice(0, 5) : ['Core Foundations'],
+      recommendedActions: generateFallbackRecommendations(weakTopics),
+    };
+  }
+};
+
+/**
+ * Intelligent deterministic fallback generator for recommendations when AI API is unavailable
+ * @param {Array<string>} weakTopics
+ * @returns {Array<{ action: string, priority: string, resourceType: string }>}
+ */
+const generateFallbackRecommendations = (weakTopics = []) => {
+  const uniqueWeak = [...new Set(weakTopics)];
+  if (uniqueWeak.length === 0) {
+    return [
+      {
+        action: 'Complete your first diagnostic quiz to establish your baseline Learning DNA',
+        priority: 'High',
+        resourceType: 'Practice Quiz',
+      },
+      {
+        action: 'Review existing study notes to identify potential revision areas',
+        priority: 'Medium',
+        resourceType: 'Review Note',
+      },
+    ];
+  }
+
+  const actions = [];
+  uniqueWeak.slice(0, 3).forEach((topic, idx) => {
+    actions.push({
+      action: `Review study notes and core definitions for "${topic}"`,
+      priority: idx === 0 ? 'High' : 'Medium',
+      resourceType: 'Review Note',
+    });
+    actions.push({
+      action: `Attempt a targeted 5-question micro-quiz on "${topic}"`,
+      priority: idx === 0 ? 'High' : 'Medium',
+      resourceType: 'Practice Quiz',
+    });
+  });
+
+  return actions.slice(0, 4);
+};
