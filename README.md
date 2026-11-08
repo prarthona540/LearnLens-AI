@@ -54,6 +54,23 @@ LearnLens AI closes that loop. It turns raw notes into quizzes, measures perform
 - Voice to note, past paper analyzer, ask-your-notes chat, progress dashboard and streaks
 
 The Learning DNA is a per-student profile that updates as the student learns:
+## 🚀 LearnLens AI - MVP Core Modules Checklist
+
+### 🧠 Core Learning Engine
+- [x] JWT Authentication & Protected Middleware
+- [x] Smart Note Capture & Gemini Multimodal Parser
+- [x] Topic-Tagged Quiz & Gap Detection Engine
+- [x] Learning DNA & Readiness Score Core
+
+### 🎯 Advanced AI & Flagship Features
+- [x] Voice-to-Note Lecture Audio Analyzer
+- [x] Dynamic AI Exam Trend & Predictive Question Engine
+- [x] RPG-Style Skill Tree & Boss Challenge Arena
+- [x] AI Study Focus, Pomodoro & Mood Analytics
+- [x] Gamified XP, Leveling & Daily Streak Engine
+- [x] Past Paper & Syllabus Mock Exam Simulator
+- [x] AI Cognitive Holograph & 3D Concept Constellation
+- [x] Autonomous Socratic Viva Examiner (Flagship)
 
 - **Exam readiness score**: an overall measure of preparedness
 - **Strong topics**: what the student has mastered
