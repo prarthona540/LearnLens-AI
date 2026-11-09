@@ -26,3 +26,5 @@ Using Artificial Intelligence, the system generates:
 - Weak topic detection
 - Adaptive study plans
 - Learning progress insights
+> **Project Vision Note:**
+ Designed to bridge individual knowledge gaps through Socratic evaluation and adaptive AI feedback loops.
