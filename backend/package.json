@@ -1,7 +1,7 @@
 {
   "name": "learnlens-ai-backend",
   "version": "1.0.0",
-  "description": "Backend API for LearnLens AI - AI-powered personalized learning intelligence platform",
+  "description": "LearnLens AI Backend API - Socratic evaluation engine and AI learning suite",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -23,11 +23,6 @@
   },
   "keywords": [
     "learnlens",
-    "ai",
-    "gemini",
-    "edtech",
-    "mern"
-  ],
-  "author": "LearnLens AI Team",
-  "license": "MIT"
+    "ai"
+  ]
 }
